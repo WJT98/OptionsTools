@@ -1,9 +1,21 @@
-<div fxLayout="column">
-  <!-- Header -->
-  <div fxLayout="row" fxFlex="50px" fxLayoutAlign="center center"><app-header></app-header></div>
-  <!-- Main -->
-  <div fxLayout="row wrap" style="height: 150px">
-    <div fxFlexOrder="1" fxLayout="row" fxLayoutAlign="top left"><app-sidebar></app-sidebar></div>
-    <div fxFlexOrder="2" fxLayout="row" fxLayoutAlign="start"><router-outlet></router-outlet></div>
-  </div>
+<div fxFlexFill fxLayout="column">
+    <!-- Header -->
+    <app-header></app-header>
+    <!-- Main -->
+    <mat-sidenav-container>
+        <mat-sidenav mode="side" opened>
+            <app-sidebar></app-sidebar>
+        </mat-sidenav>
+        <mat-sidenav-content>
+            <router-outlet></router-outlet>
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+
+        <!-- <div fxFlexFill fxFlexOrder="1" fxLayout="row">
+            <app-sidebar></app-sidebar>
+        </div>
+        <div fxFlexFill fxFlexOrder="2" fxLayout="row">
+            <router-outlet></router-outlet>
+        </div> -->
+
 </div>

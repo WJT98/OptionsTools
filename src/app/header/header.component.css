@@ -1,0 +1,12 @@
+.header-container {
+    position: fixed;
+    height: 64px;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+a, a:visited, a:hover, a:active{
+    color: white;
+    text-decoration: none;
+}
