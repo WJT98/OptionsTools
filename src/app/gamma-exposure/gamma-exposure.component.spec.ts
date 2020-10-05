@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OptionsDataComponent } from './options-data.component';
+import { GammaExposureComponent } from './gamma-exposure.component';
 
-describe('OptionsDataComponent', () => {
-  let component: OptionsDataComponent;
-  let fixture: ComponentFixture<OptionsDataComponent>;
+describe('GammaExposureComponent', () => {
+  let component: GammaExposureComponent;
+  let fixture: ComponentFixture<GammaExposureComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ OptionsDataComponent ]
+      declarations: [ GammaExposureComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OptionsDataComponent);
+    fixture = TestBed.createComponent(GammaExposureComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

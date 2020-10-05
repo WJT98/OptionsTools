@@ -1,0 +1,13 @@
+.ticker-input{
+    margin: 1rem;
+}
+
+mat-form-field,
+textarea {
+  width:30%
+}
+
+mat-card{
+    width: 35%;
+    margin: 1rem;
+}

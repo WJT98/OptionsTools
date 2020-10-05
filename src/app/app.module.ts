@@ -1,14 +1,15 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './app-routing.module';
+//Components
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
-import { OptionsDataComponent } from './options-data/options-data.component';
+import { GammaExposureComponent } from './gamma-exposure/gamma-exposure.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ChartSettingsComponent } from './gamma-exposure/chart-settings/chart-settings.component';
 
-// Add Material
+//Modules
+import { BrowserModule } from '@angular/platform-browser';
+import { AppRoutingModule } from './app-routing.module';
+import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -21,6 +22,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { ChartComponent } from './gamma-exposure/chart/chart.component'
+import { FormsModule } from '@angular/forms'
+
 
 
 
@@ -29,9 +34,11 @@ import { MatButtonModule } from '@angular/material/button';
     declarations: [
         AppComponent,
         HeaderComponent,
-        OptionsDataComponent,
+        GammaExposureComponent,
         SidebarComponent,
         DashboardComponent,
+        ChartSettingsComponent,
+        ChartComponent,
     ],
     imports: [
         BrowserModule,
@@ -47,7 +54,9 @@ import { MatButtonModule } from '@angular/material/button';
         MatDividerModule,
         MatListModule,
         MatRippleModule,
-        MatButtonModule
+        MatButtonModule,
+        MatCardModule,
+        FormsModule
     ],
     providers: [],
     bootstrap: [AppComponent],
