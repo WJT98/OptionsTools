@@ -15,6 +15,7 @@ export class ChartSettingsComponent {
         if (form.invalid) {
             return;
         }
+
         this.chartSettingsService.addChart(form.value.ticker, form.value.timePeriod);
     }
 }

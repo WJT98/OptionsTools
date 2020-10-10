@@ -25,7 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ChartComponent } from './gamma-exposure/chart/chart.component'
 import { FormsModule } from '@angular/forms'
-
+import { HttpClientModule } from '@angular/common/http'
 
 
 
@@ -56,7 +56,8 @@ import { FormsModule } from '@angular/forms'
         MatRippleModule,
         MatButtonModule,
         MatCardModule,
-        FormsModule
+        FormsModule,
+        HttpClientModule
     ],
     providers: [],
     bootstrap: [AppComponent],

@@ -17,7 +17,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
 
     ngOnInit() {
-        this.chartSettings = this.chartSettingsService.getSettings();
+        this.chartSettingsService.getSettings();
         this.chartSettingsSub = this.chartSettingsService.getSettingsUpdateListener()
         .subscribe((chartSettings: ChartSettings) => {
             this.chartSettings = chartSettings;
