@@ -10,13 +10,13 @@ app.use(bodyParse.urlencoded({extended: false}));
 app.use((req, res, next) => {
     //Allows
     res.setHeader("Access-Control-Allow-Origin","*");
-    res.setHeader("Access-Control-Allow-Headers","Origin",
-    "X-Requested-Width", "Content-Type", "Accept");
-    res.setHeader("Access-Control-Allow-Methods", "Get, POST, PATCH, DELETE, OPTIONS");
+	res.setHeader("Access-Control-Allow-Headers",
+	"Origin , X-Requested-Width, Content-Type, Accept");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
     next();
 });
 
-app.post("/api/posts", (req, res, next) => {
+app.post("/api/data", (req, res, next) => {
     const chartSettings = req.body;
     console.log(chartSettings);
     res.status(201).json({
@@ -26,7 +26,7 @@ app.post("/api/posts", (req, res, next) => {
 
 //if this was a use request, then we would need a "next()" in the previous request
 app.get('/api/data',(req, res, next) => {
-    chartSettings = {ticker: "SPY", timePeriod: 1};
+    chartSettings = {ticker: "AAPL", timePeriod: 1};
     //do not need return res.json() because
     //it is the last statement in this block
     //don't need 'next()' because there is no next middleware

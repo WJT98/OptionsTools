@@ -29,12 +29,14 @@ export class ChartSettingsService {
             ticker: ticker,
             timePeriod: timePeriod,
         };
-        this.http.post<{message:string>('http://localhost:3000/api/posts', chartSettings)
-            .subscribe(responseData =>{
-                console.log(responseData.message);
-                this.chartSettings = chartSettings;
-                this.settingsUpdated.next({ ...this.chartSettings });
-            });
+		this.http
+		.post<{ message:string }> ('http://localhost:3000/api/data', chartSettings)
+		.subscribe(responseData =>{
+			console.log(responseData.message);
+			this.chartSettings = chartSettings;
+			this.settingsUpdated.next({ ...this.chartSettings });
+		});
+
 
     }
 }
