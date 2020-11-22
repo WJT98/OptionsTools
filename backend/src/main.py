@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,6 +10,7 @@ from .entities.ticker import Ticker, TickerSchema
 
 
 app = Flask(__name__)
+CORS(app)
 # generate database schema
 Base.metadata.create_all(engine)
 
