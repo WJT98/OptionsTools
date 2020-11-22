@@ -1,6 +1,5 @@
 # coding=utf-8
-from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
+from .entity import Entity, Base
 from sqlalchemy import Column, String
 # import psycopg2 as ps
 # # define credentials 
@@ -16,12 +15,7 @@ from sqlalchemy import Column, String
 #                   password=credentials['POSTGRES_PASSWORD'],
 #                   port=credentials['POSTGRES_PORT'])
 # cur = conn.cursor()
-Base = declarative_base()
 
-class Ticker(Base):
-    __tablename__ = 'tickers'
-
-    ticker = Column(String, primary_key=True)
-
-    def __init__(self, ticker):
-        self.ticker = ticker
+class Ticker(Entity, Base):
+	__tablename__ = 'tickers'
+	ticker = Column(String, primary_key=True)
