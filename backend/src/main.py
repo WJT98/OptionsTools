@@ -1,30 +1,45 @@
+from flask import Flask, jsonify, request
+
 from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from .entities.entity import Session, engine, Base
-from .entities.ticker import Ticker
+from .entities.ticker import Ticker, TickerSchema
 
+
+app = Flask(__name__)
 # generate database schema
 Base.metadata.create_all(engine)
 
-# start session
-session = Session()
+@app.route('/tickers')
+def get_tickers():
+	session = Session()
 
-# check for existing data
-tickers = session.query(Ticker).all()
+	ticker_objects = session.query(Ticker).all()
 
-if len(tickers) == 0:
-    # create and persist mock tickers
-    python_ticker = Ticker("SPY")
-    session.add(python_ticker)
-    session.commit()
-    session.close()
+	schema = TickerSchema(many=True)
+	tickers = schema.dump(ticker_objects)
 
-    # reload tickers
-    tickers = session.query(Ticker).all()
+	session.close()
+	return jsonify(tickers)
 
-# show existing tickers
-print('Tracked Tickers:')
-for ticker in tickers:
-    print(f'{ticker.ticker}: ')
+
+@app.route('/tickers', methods=['POST'])
+def add_ticker():
+	new_ticker = TickerSchema(only=('ticker'))\
+		.load (request.get_json())
+
+	ticker = Ticker(**new_ticker.ticker)
+
+	session = Session()
+	session.add(ticker)
+	session.commit()
+
+	new_ticker = TickerSchema().dump(ticker).data
+	session.close()
+	return jsonify(new_ticker), 201
+
+
+#fuser -n tcp -k 5000
+#curl http://0.0.0.0:5000/tickers
