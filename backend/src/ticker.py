@@ -1,20 +1,7 @@
 # coding=utf-8
-
 from datetime import datetime
-from sqlalchemy import create_engine, Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-db_url = 'historical-options-data.cirab4swhdtx.us-east-2.rds.amazonaws.com:5432'
-db_name = 'historical-options-data'
-db_user = 'postgres'
-db_password = 'asdf1234'
-engine = create_engine(f'postgresql://{db_user}:{db_password}@{db_url}/{db_name}')
-Session = sessionmaker(bind=engine)
-
-Base = declarative_base()
-
-
+from sqlalchemy import Column, String
 # import psycopg2 as ps
 # # define credentials 
 # credentials = {'POSTGRES_ADDRESS' : '', # change to your endpoint
@@ -29,13 +16,12 @@ Base = declarative_base()
 #                   password=credentials['POSTGRES_PASSWORD'],
 #                   port=credentials['POSTGRES_PORT'])
 # cur = conn.cursor()
+Base = declarative_base()
 
+class Ticker(Base):
+    __tablename__ = 'tickers'
 
-class Option():
-    id = Column(Integer, primary_key=True)
-    ticker = Column(String)
+    ticker = Column(String, primary_key=True)
 
-    def __init__(self, created_by):
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-        self.last_updated_by = created_by
+    def __init__(self, ticker):
+        self.ticker = ticker
