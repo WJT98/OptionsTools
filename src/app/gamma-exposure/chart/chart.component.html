@@ -1,2 +1,11 @@
 {{ chartSettings.ticker }}
 {{ chartSettings.timePeriod }}
+
+<h2>Here are the dsf created so far: </h2>
+{{ optionsData }}
+asdf
+<ul>
+  <li *ngFor="let options of optionsData">
+    {{options.ticker}}
+  </li>
+</ul>

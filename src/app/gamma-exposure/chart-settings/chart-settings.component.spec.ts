@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-
 import { ChartSettingsComponent } from './chart-settings.component';
 
 describe('SubmitTickerComponent', () => {

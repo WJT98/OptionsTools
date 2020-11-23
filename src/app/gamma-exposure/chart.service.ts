@@ -4,11 +4,12 @@ import { HttpClient } from '@angular/common/http';
 
 import { ChartSettings } from './chart-settings.model';
 
+
 @Injectable({ providedIn: 'root' })
 export class ChartSettingsService {
     private chartSettings: ChartSettings;
     private settingsUpdated = new Subject<ChartSettings>();
-    constructor(private http:HttpClient){}
+	constructor(private http:HttpClient){}
 
     getSettings() {
         this.http.get<{message:string, chartSettings:ChartSettings}>('http://localhost:3000/api/data')
@@ -17,7 +18,6 @@ export class ChartSettingsService {
             //Informs observers that chartSettings is updated
             this.settingsUpdated.next({ ...this.chartSettings });
         });
-
     }
 
     getSettingsUpdateListener() {
@@ -28,7 +28,8 @@ export class ChartSettingsService {
         const chartSettings: ChartSettings = {
             ticker: ticker,
             timePeriod: timePeriod,
-        };
+		};
+		/*
 		this.http
 		.post<{ message:string }> ('http://localhost:3000/api/data', chartSettings)
 		.subscribe(responseData =>{
@@ -36,7 +37,6 @@ export class ChartSettingsService {
 			this.chartSettings = chartSettings;
 			this.settingsUpdated.next({ ...this.chartSettings });
 		});
-
-
+		*/
     }
 }
