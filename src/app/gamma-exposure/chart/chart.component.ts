@@ -23,17 +23,16 @@ export class ChartComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.chartSettingsService.getSettings();
-        this.chartSettingsSub = this.chartSettingsService.getSettingsUpdateListener()
+		
+		this.chartSettingsSub = this.chartSettingsService.getSettingsUpdateListener()
         .subscribe((chartSettings: ChartSettings) => {
             this.chartSettings = chartSettings;
 		});
-		
-		this.optionsSub = this.optionsApiService
-			.getOptions()
+		this.optionsApiService.getOptions();
+		this.optionsSub = this.optionsApiService.getOptionsUpdateListener()
 			.subscribe((optionsData: Options[]) => {
 				this.optionsData = optionsData;
-			}
-			);
+		});
 
     }
 

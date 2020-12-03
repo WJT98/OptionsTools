@@ -45,3 +45,4 @@ def add_ticker():
 
 #fuser -n tcp -k 5000
 #curl http://0.0.0.0:5000/tickers
+#./bootstrap.sh &
