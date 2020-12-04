@@ -24,7 +24,7 @@ def get_html(ticker, date):
 	with open(filename, "w", encoding='utf-8') as f:
 		f.write(str(soup))
 
-def store_data(ticker, date):
+def get_data(ticker, date):
 	with open(ticker+"/"+date+".html", 'r') as f:
 		contents = f.read()
 		soup = BeautifulSoup(contents, 'lxml')
@@ -42,6 +42,6 @@ def main():
 	filename = os.path.join(os.getcwd(),ticker+"/"+d+".html")
 	if not os.path.exists(filename):
 		get_html("SPY", d)
-	df = store_data("SPY", d)
-
+	df = get_data("SPY", d)
+	df.head(5)
 main()
