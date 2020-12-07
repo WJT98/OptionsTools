@@ -1,21 +1,9 @@
 import psycopg2 as ps
 import scrape_oic as so
 import logging
-import datetime import date
-
-try:
-    conn = connect(
-        dbname = "python_test",
-        user = "WRONG_USER",
-        host = "localhost",
-        password = "mypass"
-    )
-except OperationalError as err:
-    # pass exception to function
-    print_psycopg2_exception(err)
-
-    # set the connection to 'None' in case of error
-    conn = None
+from datetime import date
+import os
+import thread
 
 
 def db_connection(credentials):
@@ -26,44 +14,62 @@ def db_connection(credentials):
 						user=credentials['POSTGRES_USERNAME'],
 						password=credentials['POSTGRES_PASSWORD'],
 						port=credentials['POSTGRES_PORT'])
-	except OperationalError as err:
-		logging.exception(print_psycopg2_exception(err))
+	except Exception as err:
+		#logging.error(print_psycopg2_exception(err))
+		print(err)
 		conn = None
 	return conn
-)
 	
-	
-
-	return conn
+def insert_df(conn, df, tablename):
+	return None
 
 def main():
-	os.makedirs("logs")
-	logger = logging.getLogger(today.strftime("%d/%m/%Y") + '.log')
-
-	credentials = {'POSTGRES_ADDRESS' : 'historical-options-data.cirab4swhdtx.us-east-2.rds.amazonaws.com
-	', # change to your endpoint
-				'POSTGRES_PORT' : '5432', # change to your port
-				'POSTGRES_USERNAME' : 'postgres', # change to your username
-				'POSTGRES_PASSWORD' : 'asdf1234', # change to your password
-				'POSTGRES_DBNAME' : 'postgres'} # change to your db name
+	if not os.path.isdir("logs"):
+		os.makedirs("logs")
+	logging.basicConfig(level=logging.DEBUG, 
+						format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+     					datefmt='%Y-%m-%d %H:%M:%S',
+						handlers=[
+							logging.FileHandler(date.today().strftime("%Y-%m-%d") + '.log'),
+							logging.StreamHandler()])	
+	credentials = {'POSTGRES_ADDRESS' : 'historical-options-data.cirab4swhdtx.us-east-2.rds.amazonaws.com', 
+				'POSTGRES_PORT' : '5432', 
+				'POSTGRES_USERNAME' : 'postgres', 
+				'POSTGRES_PASSWORD' : 'asdf1234',
+				'POSTGRES_DBNAME' : 'postgres'} 
 	
 	while True:
 		conn = db_connection(credentials)
-		if conn != None break
-	
-	cur = conn.cursor()
+		if conn is not None: 
+			logging.info("DB connection established")
+			break
+		else:
+			logging.error("DB connection refused")
 
+	cur = conn.cursor()
 	while True:
 		try:
-			cur.execute("""SELECT * FROM TICKERS""")
+			cur.execute("""SELECT ticker FROM TICKERS""")
 		except Exception as err:
-			#use logger here
-		tickers = cur.fetchall()	
-		if cur.fetchall() break
+			logging.error("SQL SELECT FAILED")
+		tickers = cur.fetchall()
+		print(tickers)	
+		if tickers:
+			break
 
+	d = date.today().strftime("%Y-%m-%d")
+	print(d)
 	for t in tickers:
-		df = so.get_data()
-	conn.commit()
+		print(t[0])
+		df = so.get_data(t[0],d) 
+		err = insert_df(conn, df, t[0])
+		if err:
+			logging.error(err)
+		else:
+			conn.commit()
+			logging.info(t[0] + " EOD options data inserted")
+
+main()
 
 
 

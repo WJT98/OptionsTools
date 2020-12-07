@@ -16,16 +16,22 @@ def get_cnt():
 
 def get_html(ticker, date):
 	cnt = get_cnt()
-	url = "https://oic.ivolatility.com/oic_adv_options.j?cnt="+cnt+"&ticker="+ticker+"&exp_date=1"
+	url = "https://oic.ivolatility.com/oic_adv_options.j?cnt="+cnt+"&ticker="+ticker+"&exp_date=-1"
 	page = requests.get(url)
 	soup = BeautifulSoup(page.content, 'html.parser')
-	filename = os.path.join(os.getcwd(),ticker+"/"+date+".html")
+	if not os.path.isdir("bs4_html"):
+		os.makedirs("bs4_html")
+	filename = os.path.join(os.getcwd(),"bs4_html/"+ticker+"/"+date+".html")
 	os.makedirs(os.path.dirname(filename), exist_ok=True)
 	with open(filename, "w", encoding='utf-8') as f:
 		f.write(str(soup))
 
 def get_data(ticker, date):
-	with open(ticker+"/"+date+".html", 'r') as f:
+
+	filename = os.path.join(os.getcwd(),"bs4_html/"+ticker+"/"+date+".html")
+	if not os.path.exists(filename):
+		get_html(ticker, date)
+	with open("bs4_html/"+ticker+"/"+date+".html", 'r') as f:
 		contents = f.read()
 		soup = BeautifulSoup(contents, 'lxml')
 	table = soup.find_all('table')[11]
@@ -44,4 +50,3 @@ def main():
 		get_html("SPY", d)
 	df = get_data("SPY", d)
 	df.head(5)
-main()
