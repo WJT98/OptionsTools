@@ -3,8 +3,8 @@ import scrape_oic as so
 import logging
 from datetime import date
 import os
-import thread
-
+import threading
+import pandas as pd
 
 def db_connection(credentials):
 	try:
@@ -30,7 +30,7 @@ def main():
 						format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
      					datefmt='%Y-%m-%d %H:%M:%S',
 						handlers=[
-							logging.FileHandler(date.today().strftime("%Y-%m-%d") + '.log'),
+							logging.FileHandler('logs/'+date.today().strftime("%Y-%m-%d") + '.log'),
 							logging.StreamHandler()])	
 	credentials = {'POSTGRES_ADDRESS' : 'historical-options-data.cirab4swhdtx.us-east-2.rds.amazonaws.com', 
 				'POSTGRES_PORT' : '5432', 
@@ -53,15 +53,16 @@ def main():
 		except Exception as err:
 			logging.error("SQL SELECT FAILED")
 		tickers = cur.fetchall()
-		print(tickers)	
 		if tickers:
 			break
 
 	d = date.today().strftime("%Y-%m-%d")
-	print(d)
 	for t in tickers:
-		print(t[0])
-		df = so.get_data(t[0],d) 
+		df = so.get_data(t[0],d)
+		print(list(df.loc[0]))
+		pd.set_option("display.max_rows", 5, "display.max_columns", None)
+		print(df.head())
+		break 
 		err = insert_df(conn, df, t[0])
 		if err:
 			logging.error(err)
