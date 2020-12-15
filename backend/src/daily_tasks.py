@@ -3,7 +3,8 @@ import scrape_oic as so
 import logging
 from datetime import date
 import os
-import threading
+from multiprocessing import Pool, cpu_count
+from timeit import default_timer as timer
 import pandas as pd
 
 def db_connection(credentials):
@@ -20,7 +21,8 @@ def db_connection(credentials):
 		conn = None
 	return conn
 	
-def insert_df(conn, df, tablename):
+def insert_df(df, tablename, conn):
+	
 	return None
 
 def main():
@@ -56,20 +58,39 @@ def main():
 		if tickers:
 			break
 
-	d = date.today().strftime("%Y-%m-%d")
-	for t in tickers:
-		df = so.get_data(t[0],d)
-		print(list(df.loc[0]))
-		pd.set_option("display.max_rows", 5, "display.max_columns", None)
-		print(df.head())
-		break 
-		err = insert_df(conn, df, t[0])
-		if err:
+	vdate = date.today().strftime("%Y-%m-%d")
+	
+	print(f'starting computations on {cpu_count()} cores')
+	start = timer()
+	
+	with Pool() as pool:
+		try:
+			args = [(t,vdate) for t in tickers]
+			res = pool.starmap(so.get_data, args)
+		except Exception as err:
 			logging.error(err)
-		else:
-			conn.commit()
-			logging.info(t[0] + " EOD options data inserted")
-
+			return
+		logging.info("EOD options data scraped into list of dataframes for all tickers")
+	
+		end = timer()
+		print(f'elapsed time: {end - start}')
+		
+		try:
+			res = pool.map(so.process_df, res)
+		except Exception as err:
+			logging.error(err)
+			return
+		logging.info("Processed all dataframes")
+		
+		try:
+			args = [x + (conn,) for x in res]
+			res = pool.starmap(insert_df, args)
+		except Exception as err:
+			logging.error(err)
+			return
+		conn.commit()
+		logging.info("All dataframes inserted into db + committed")
+		
 main()
 
 

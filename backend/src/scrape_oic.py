@@ -8,7 +8,6 @@ import numpy
 import pandas as pd
 
 
-ticker = "SPY"
 def get_cnt():
 	r = requests.get("https://www.optionseducation.org/toolsoptionquotes/optionsquotes")
 	cnt = re.search("cnt=([A-F0-9]+)", r.text)
@@ -28,31 +27,49 @@ def get_html(ticker, date):
 
 
 #returns a tuple (df containing all options data, list of expiry dates)
-def process_df(df):
+def process_df(df, ticker):
 	#with open("RAWHTML2.html", "w", encoding='utf-8') as f:
+	exp_dates = []
+	start, end = 0,0
 	for i in range(len(df)):
 		#print(df[i].columns)
-		print(list(df[i].columns.values))
+		#print(list(df[i].columns.values))
 		headers = ''.join([str(x) for x in list(df[i].columns.values)])
-		if re.search("Expiration", headers):
-			exp_dates = re.findall("^[A-Z][a-z]{2} [0-9]{2}, [0-9]{4}", headers)
+		if exp_dates is not None and re.search("Expiration", headers):
+			exp_dates = re.findall("[A-Z][a-z]{2} [0-9]{2}, [0-9]{4}", headers)
 			print(exp_dates)
-		#f.write(str(df[i].head()))
-	processed_df=[]
-	return processed_df, exp_dates
+		elif re.search("Expiry:", headers):
+			if end == 0:
+				end = start
+			end += 1
+			new_header = df[i].iloc[0]
+			df[i] = df[i][1:]
+			df[i].columns = new_header
+			df[i].rename(columns=df[i].iloc[0])
+		elif re.search("Rho", headers):
+			if end == 0:
+				end = start
+			end +=1
+		else:
+			start +=1
+	df_processed = df[start:end+1]
+	# for i in range(len(processed_df)):
+	# 	print(processed_df[i].head())
+	print(df[-3])
+	print(df[-2])
+	print(df[-1])
+	print(len(exp_dates), len(df_processed))
+	return df_processed, exp_dates, ticker
 
 
-
+#returns dataframe and the associated ticker (needs to be passed on for multiprocessing)
 def get_data(ticker, date):
-
 	filename = os.path.join(os.getcwd(),"bs4_html/"+ticker+"/"+date+".html")
 	if not os.path.exists(filename):
 		get_html(ticker, date)
 	with open("bs4_html/"+ticker+"/"+date+".html", 'r') as f:
 		contents = f.read()
 		soup = BeautifulSoup(contents, 'lxml')
-	#table = soup.find_all('table')[10:-1]
-
 	table = soup.find_all('table')
 	#return a list of dataframes
 	df = pd.read_html(str(table), flavor='bs4', header=[1])
@@ -63,7 +80,7 @@ def get_data(ticker, date):
 		#for i in range(len(df)):
 			#print(df[i].columns)
 		#	f.write(str(df[i].head()))
-	return df
+	return df, ticker
 
 
 	
