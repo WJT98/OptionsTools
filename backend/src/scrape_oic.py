@@ -46,10 +46,14 @@ def process_df(df, ticker):
 			df[i] = df[i][1:]
 			df[i].columns = new_header
 			df[i].rename(columns=df[i].iloc[0])
+			df[i]['Implied Vola%'] = df[i]['Implied Vola%'].str.rstrip('%')
+			df[i].drop(['Bid/Ask Mean', 'Change (%)'], axis=1, inplace=True)
 		elif re.search("Rho", headers):
 			if end == 0:
 				end = start
 			end +=1
+			df[i]['Implied Vola%'] = df[i]['Implied Vola%'].str.rstrip('%')
+			df[i].drop(['Bid/Ask Mean', 'Change (%)', 'Option Symbol.1'], axis=1, inplace=True)
 		else:
 			start +=1
 	df_processed = df[start:end+1]
@@ -58,8 +62,10 @@ def process_df(df, ticker):
 	print(df[-3])
 	print(df[-2])
 	print(df[-1])
+	pd.set_option("display.max_rows", 10, "display.max_columns", None)
+	print(df_processed[0].head())
 	print(len(exp_dates), len(df_processed))
-	return df_processed, exp_dates, ticker
+	return df_processed, ticker, exp_dates
 
 
 #returns dataframe and the associated ticker (needs to be passed on for multiprocessing)
@@ -91,6 +97,6 @@ def main():
 	if not os.path.exists(filename):
 		get_html("SPY", d)
 	df = get_data("SPY", d)
-	df_tuple = process_df(df)
+	df_tuple = process_df(df[0],df[1])
 
 main()

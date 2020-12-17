@@ -1,78 +1,57 @@
 import psycopg2
 from psycopg2 import pool
 import db_config
-from psycopg2 import Error
+from psycopg2 import OperationalError, errorcodes, errors, Error
+import sys
 
+def print_psycopg2_exception(err):
+    # get details about the exception
+    err_type, err_obj, traceback = sys.exc_info()
 
+    # get the line number when exception occured
+    line_num = traceback.tb_lineno
 
-def create_tickers():
-	query = '''CREATE TABLE IF NOT EXISTS tickers (
-		id			BIGSERIAL	NOT NULL,
-		name		TEXT		NOT NULL,
-		exchange 	TEXT		NOT NULL,
-		PRIMARY KEY(id));'''
+    # print the connect() error
+    print ("\npsycopg2 ERROR:", err, "on line number:", line_num)
+    print ("psycopg2 traceback:", traceback, "-- type:", err_type)
 
-def create_options_chain():
-	query = '''CREATE TABLE IF NOT EXISTS option_chain (
-		id				BIGSERIAL	PRIMARY	KEY	NOT NULL,
-		underlying_id	BIGSERIAL	NOT NULL,
-		exp_date		DATE		NOT NULL,
-		strike			SMALLINT 	NOT NULL,
-		option			BIT(1)		NOT NULL,
-		PRIMARY KEY(id),
-		FOREIGN KEY(underlying_id) REFERENCES tickers(id));'''
+    # psycopg2 extensions.Diagnostics object attribute
+    print ("\nextensions.Diagnostics:", err.diag)
 
-def create_options_metrics():
-	query = '''CREATE TABLE IF NOT EXISTS option_chain (
-			id				BIGSERIAL		PRIMARY	KEY	NOT NULL,
-			option_id		BIGSERIAL		NOT NULL,
-			v_date			DATE			NOT NULL,
-			bid				REAL 			NOT NULL,
-			ask				REAL			NOT NULL,
-			volume			INTEGER			NOT NULL,
-			open_interest	BIGINT			NOT NULL,
-			iv				NUMERIC(5,2)	NOT NULL
-			delta			NUMERIC(5,4)	NOT NULL,
-			gamma			NUMERIC(5,4)	NOT NULL,
-			theta			NUMERIC(5,4)	NOT NULL,	
-			alpha			NUMERIC(5,4)	NOT NULL,
-			vega			NUMERIC(5,4)	NOT NULL,
-			rho				NUMERIC(5,4)	NOT NULL,
-			option			BIT(1)		NOT NULL,
-			PRIMARY KEY(id),
-			FOREIGN KEY(option_id) REFERENCES options_chain(id));'''
+    # print the pgcode and pgerror exceptions
+    print ("pgerror:", err.pgerror)
+    print ("pgcode:", err.pgcode, "\n")
 
-
+def exec_query(conn, query):
+	try:
+		cursor = conn.cursor()
+		cursor.execute(query)
+	except Error as err:
+		conn.rollback()
+		cursor.close()
+		raise err
+		
 def main():
 	try:
-		postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20,
-												user = db_config.user,
-												password = db_config.password,
-												host = db_config.host,
-												port = db_config.port,
-												database = db_config.database)
-			
-		if(postgreSQL_pool):
-			print("Connection pool created successfully")
+		conn = psycopg2.connect(user = db_config.user,
+									password = db_config.password,
+									host = db_config.host,
+									port = db_config.port,
+									database = db_config.database)
+		if(conn):
+			print("Connection created successfully")
+		
+		exec_query(conn, db_config.create_tickers_query)
+		exec_query(conn, db_config.create_options_chain_query)
+		exec_query(conn, db_config.create_options_metrics_query)
 
-		# Use getconn() to Get Connection from connection pool
-		ps_connection  = postgreSQL_pool.getconn()
-
-		if(ps_connection):
-			print("successfully received connection from connection pool ")
-
-			postgreSQL_pool.putconn(ps_connection)
-			print("Put away a PostgreSQL connection")
-
-	except (Exception, Error) as error :
-		print ("Error while connecting to PostgreSQL", error)
-
+	except (Error, OperationalError) as err:
+		conn = None
+		print_psycopg2_exception(err)
 	finally:
-		if (postgreSQL_pool):
-			postgreSQL_pool.closeall
-		print("PostgreSQL connection pool is closed")
-
-
+		if (conn):
+			conn.close()
+			print("PostgreSQL connection is closed")
 
 main()
 
