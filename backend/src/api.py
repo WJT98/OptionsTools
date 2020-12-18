@@ -20,6 +20,23 @@ def add_ticker(ticker):
 if __name__ == '__main__':
     app.run(debug=True)
 
+
+def insert_df(df, ticker, exp_date):
+
+def scrape_oic():
+
+	return list_df
+
+def bulk_insert(df):
+
+
+def options_job():
+	#multiprocess
+	df = scrape_oic()
+	for x in df:
+
+	bulk_insert(df)
+
 #fuser -n tcp -k 5000
 #curl http://0.0.0.0:5000/tickers
 #./bootstrap.sh &

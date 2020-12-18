@@ -4,6 +4,20 @@ import db_config
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
 
+def db_connection():
+	try:
+		# create connection and cursor    
+		conn = psycopg2.connect(user = db_config.user,
+									password = db_config.password,
+									host = db_config.host,
+									port = db_config.port,
+									database = db_config.database)
+	except Exception as err:
+		logging.error(print_psycopg2_exception(err))
+		print(err)
+		conn = None
+	return conn
+	
 def print_psycopg2_exception(err):
     # get details about the exception
     err_type, err_obj, traceback = sys.exc_info()
@@ -30,7 +44,9 @@ def exec_query(conn, query):
 		conn.rollback()
 		cursor.close()
 		raise err
-		
+
+
+
 def main():
 	try:
 		conn = psycopg2.connect(user = db_config.user,
@@ -44,6 +60,7 @@ def main():
 		exec_query(conn, db_config.create_tickers_query)
 		exec_query(conn, db_config.create_options_chain_query)
 		exec_query(conn, db_config.create_options_metrics_query)
+		
 
 	except (Error, OperationalError) as err:
 		conn = None
