@@ -13,9 +13,7 @@ def db_connection():
 									port = db_config.port,
 									database = db_config.database)
 	except Exception as err:
-		logging.error(print_psycopg2_exception(err))
-		print(err)
-		conn = None
+		raise err
 	return conn
 	
 def print_psycopg2_exception(err):
@@ -46,7 +44,9 @@ def exec_query(conn, query):
 		raise err
 
 
+def insert_tickers(csv):
 
+	
 def main():
 	try:
 		conn = psycopg2.connect(user = db_config.user,

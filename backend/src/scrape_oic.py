@@ -27,7 +27,7 @@ def get_html(ticker, date):
 
 
 #returns a tuple (df containing all options data, list of expiry dates)
-def process_df(df, ticker):
+def process_df(df):
 	#with open("RAWHTML2.html", "w", encoding='utf-8') as f:
 	exp_dates = []
 	start, end = 0,0
@@ -48,6 +48,12 @@ def process_df(df, ticker):
 			df[i].rename(columns=df[i].iloc[0])
 			df[i]['Implied Vola%'] = df[i]['Implied Vola%'].str.rstrip('%')
 			df[i].drop(['Bid/Ask Mean', 'Change (%)'], axis=1, inplace=True)
+			#ADD EXP_DATE COLUMN
+			##
+			## ***********************************
+			##
+			##
+			##
 		elif re.search("Rho", headers):
 			if end == 0:
 				end = start
@@ -65,28 +71,31 @@ def process_df(df, ticker):
 	pd.set_option("display.max_rows", 10, "display.max_columns", None)
 	print(df_processed[0].head())
 	print(len(exp_dates), len(df_processed))
-	return df_processed, ticker, exp_dates
+	return df_processed, exp_dates
 
 
 #returns dataframe and the associated ticker (needs to be passed on for multiprocessing)
 def get_data(ticker, date):
-	filename = os.path.join(os.getcwd(),"bs4_html/"+ticker+"/"+date+".html")
-	if not os.path.exists(filename):
-		get_html(ticker, date)
-	with open("bs4_html/"+ticker+"/"+date+".html", 'r') as f:
-		contents = f.read()
-		soup = BeautifulSoup(contents, 'lxml')
-	table = soup.find_all('table')
-	#return a list of dataframes
-	df = pd.read_html(str(table), flavor='bs4', header=[1])
-	#with open("RAWHTML2.html", "w", encoding='utf-8') as f:
-		#f.write(str(table))
-		#pd.set_option("display.max_rows", None, "display.max_columns", None)
-		#f.write(str(pd.read_html(str(table), flavor='bs4', header=[0])))
-		#for i in range(len(df)):
-			#print(df[i].columns)
-		#	f.write(str(df[i].head()))
-	return df, ticker
+	try:
+		filename = os.path.join(os.getcwd(),"bs4_html/"+ticker+"/"+date+".html")
+		if not os.path.exists(filename):
+			get_html(ticker, date)
+		with open("bs4_html/"+ticker+"/"+date+".html", 'r') as f:
+			contents = f.read()
+			soup = BeautifulSoup(contents, 'lxml')
+		table = soup.find_all('table')
+		#return a list of dataframes
+		df = pd.read_html(str(table), flavor='bs4', header=[1])
+		#with open("RAWHTML2.html", "w", encoding='utf-8') as f:
+			#f.write(str(table))
+			#pd.set_option("display.max_rows", None, "display.max_columns", None)
+			#f.write(str(pd.read_html(str(table), flavor='bs4', header=[0])))
+			#for i in range(len(df)):
+				#print(df[i].columns)
+			#	f.write(str(df[i].head()))
+	except Exception as err:
+		raise err
+	return df
 
 
 	
@@ -97,6 +106,6 @@ def main():
 	if not os.path.exists(filename):
 		get_html("SPY", d)
 	df = get_data("SPY", d)
-	df_tuple = process_df(df[0],df[1])
+	df = process_df(df)
 
 main()
