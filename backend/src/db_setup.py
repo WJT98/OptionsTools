@@ -18,7 +18,7 @@ def db_connection():
 	
 def print_psycopg2_exception(err):
     # get details about the exception
-    err_type, err_obj, traceback = sys.exc_info()
+    err_type, traceback = sys.exc_info()
 
     # get the line number when exception occured
     line_num = traceback.tb_lineno
@@ -43,8 +43,6 @@ def exec_query(conn, query):
 		cursor.close()
 		raise err
 
-
-def insert_tickers(csv):
 
 	
 def main():
