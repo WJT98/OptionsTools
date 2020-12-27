@@ -4,7 +4,7 @@ import db_config
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
 
-def db_connection():
+def get_conn():
 	try:
 		# create connection and cursor    
 		conn = psycopg2.connect(user = db_config.user,
@@ -58,9 +58,9 @@ def main():
 		exec_query(conn, db_config.create_tickers_query)
 		exec_query(conn, db_config.create_options_chain_query)
 		exec_query(conn, db_config.create_options_metrics_query)
-		
-
-	except (Error, OperationalError) as err:
+		exec_query(conn, db_config.create_import_query)
+		conn.commit()
+	except Exception as err:
 		conn = None
 		print_psycopg2_exception(err)
 	finally:
@@ -68,7 +68,9 @@ def main():
 			conn.close()
 			print("PostgreSQL connection is closed")
 
-main()
+
+if __name__ == '__main__':
+	main()
 
 
 

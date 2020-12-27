@@ -7,9 +7,6 @@ import errno
 import numpy
 import pandas as pd
 
-
-
-
 def get_cnt():
 	r = requests.get("https://www.optionseducation.org/toolsoptionquotes/optionsquotes")
 	cnt = re.search("cnt=([A-F0-9]+)", r.text)
@@ -83,7 +80,12 @@ def save_data(ticker, vdate):
 			df[i].drop(['Bid/Ask Mean', 'Change (%)'], axis=1, inplace=True)
 			df[i]['exp_date'] = exp_dates[i-start]
 			df[i]['val_date'] = vdate
-			df[i].rename(columns={'Option Symbol.1':'ticker', 'Implied Vola%':'iv', })
+			df[i].rename(columns={'Option Symbol': 'option', 'Option Symbol.1':'ticker', 
+									'Implied Vola%':'iv', 'Strike':'strike',
+									'Bid': 'bid', 'Ask':'ask','Volume':'volume', 
+									'Delta':'delta', 'Gamma':'gamma', 'Alpha':'alpha', 
+									'Vega':'vega', 'Rho':'rho', 
+									'Open Interest':'open_interest'}, inplace=True)
 			directory = "csv/"+ticker+"/"+exp_dates[i-start]
 			if not os.path.isdir(directory):
 				os.makedirs(directory)
@@ -100,5 +102,5 @@ def main():
 	if not os.path.exists(filename):
 		get_html("SPY", d)
 	save_data("SPY", d)
-
-main()
+if __name__ == '__main__':
+	main()

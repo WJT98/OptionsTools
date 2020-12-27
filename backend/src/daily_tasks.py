@@ -14,19 +14,45 @@ import db_setup
 def init_child(lock):
 	global lock
 	global conn
-	conn = db_setup.db_connection()
+	conn = db_setup.get_conn()
 	lock = lock
-	
 
-def insert_csv(csv, ticker, conn):
+
+def update_options_chain(ticker, conn):
 	try:
-		f = open(csv, 'r')
 		cursor = conn.cursor()
-		cursor.copy_from(f, 'data_set', sep=',', columns= ['id', 'underlying_id'])
-		f.close()
-		cursor.close()
+		q = '''INSERT INTO options_chain VALUES
+				SELECT DISTINCT DEFAULT, t.id, im.exp_date, 
+					im.strike, im.option
+				FROM tickers AS t, import AS im
+				WHERE imp.ticker = t.ticker 
+					AND NOT EXISTS (SELECT * 
+									FROM options_chain AS oc, import AS im
+									WHERE oc.ticker = im.ticker 
+										AND oc.exp_date = im.exp_date
+										AND oc.strike = im.strike
+										AND oc.option = im.option)'''
+		cursor.execute(q)
 	except Exception as err:
 		raise err
+	finally:
+		if cursor: 
+			cursor.close()
+		
+
+# def update_options_metrics(ticker, conn):
+
+
+def import_table(csv, ticker, conn, size=8092):
+	try:
+		cursor = conn.cursor()
+		with open(csv, 'r') as f:
+			cursor.copy_from(f, 'import', sep=',')
+	except Exception as err:
+		raise err
+	finally:
+		if cursor: 
+			cursor.close()
 
 def get_csv_list(ticker, vdate):
 	try:
@@ -42,7 +68,7 @@ def get_csv_list(ticker, vdate):
 
 def mproc_job(ticker, vdate):
 	try:
-		conn = db_setup.db_connection()
+		conn = db_setup.get_conn()
 		with lock:
 			logging.info("DB connection established")
 		df = so.get_data(ticker, vdate)
@@ -54,7 +80,8 @@ def mproc_job(ticker, vdate):
 		cursor = conn.cursor()
 		csv_files = get_csv_list(ticker, vdate)
 		for csv in csv_files:
-			insert_csv(csv, ticker, conn)
+			import_table(csv, ticker, conn)
+			conn.commit()
 		with lock:
 			logging.info(ticker+": inserted into db + committed")
 		conn.commit()
@@ -72,8 +99,6 @@ def mproc_job(ticker, vdate):
 
 
 
-
-
 def main():
 	if not os.path.isdir("logs"):
 		os.makedirs("logs")
@@ -85,7 +110,7 @@ def main():
 							logging.StreamHandler()])	
 
 
-	conn = db_setup.db_connection()
+	conn = db_setup.get_conn()
 	cur = conn.cursor()
 	try:
 		cur.execute("""SELECT ticker, exchange FROM TICKERS""")
