@@ -19,6 +19,7 @@ def get_conn():
 def print_psycopg2_exception(err):
     # get details about the exception
     err_type, traceback = sys.exc_info()
+   # err_type = sys.exc_info()
 
     # get the line number when exception occured
     line_num = traceback.tb_lineno

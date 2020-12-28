@@ -15,6 +15,7 @@ def get_cnt():
 def get_html(ticker, vdate):
 	cnt = get_cnt()
 	url = "https://oic.ivolatility.com/oic_adv_options.j?cnt="+cnt+"&ticker="+ticker+"&exp_date=-1"
+	print(url)
 	page = requests.get(url)
 	soup = BeautifulSoup(page.content, 'html.parser')
 	if not os.path.isdir("bs4_html"):
@@ -75,7 +76,13 @@ def save_data(ticker, vdate):
 		# print(df[-2])
 		# print(df[-1])
 		pd.set_option("display.max_rows", 10, "display.max_columns", None)
+		file_path = "csv/" + ticker +"/"+ vdate+".csv"
 		for i in range(start, end+1):
+			#directory = "csv/"+ticker+"/"+exp_dates[i-start]
+			if not os.path.isdir(directory):
+				os.makedirs(directory)
+			if os.path.exists(directory+"/"+vdate+".csv"):
+				continue
 			df[i]['Implied Vola%'] = df[i]['Implied Vola%'].str.rstrip('%')
 			df[i].drop(['Bid/Ask Mean', 'Change (%)'], axis=1, inplace=True)
 			df[i]['exp_date'] = exp_dates[i-start]
@@ -86,9 +93,7 @@ def save_data(ticker, vdate):
 									'Delta':'delta', 'Gamma':'gamma', 'Alpha':'alpha', 
 									'Vega':'vega', 'Rho':'rho', 
 									'Open Interest':'open_interest'}, inplace=True)
-			directory = "csv/"+ticker+"/"+exp_dates[i-start]
-			if not os.path.isdir(directory):
-				os.makedirs(directory)
+
 			df[i].to_csv(directory+"/"+vdate+".csv", index=False)
 	except Exception as err:
 		raise err
