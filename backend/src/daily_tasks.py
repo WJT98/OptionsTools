@@ -5,14 +5,14 @@ import os
 from multiprocessing import Pool, cpu_count, Lock
 from timeit import default_timer as timer
 import pandas as pd
-import db_config
-import db_setup
+import src.db_config
+import src.db_setup
 import csv
 from psycopg2 import OperationalError, errorcodes, errors
 import traceback
 import sys
 import time
-import scrape_oic as so
+import src.scrape_oic as so
 
 DEBUG = False
 
@@ -20,7 +20,7 @@ DEBUG = False
 def init_child(lock_):
 	global lock
 	global conn
-	conn = db_setup.get_conn()
+	conn = src.db_setup.get_conn()
 	lock = lock_
 
 
@@ -100,9 +100,7 @@ def import_table(csv_file, ticker, cur):
 def get_csv_list(ticker, vdate):
 	try:
 		path = "csv/" + ticker
-		#directories = [path+'/'+d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 		all_files = []
-		#for d in directories:
 		files = [path+"/"+f for f in os.listdir(path) 
 					if (os.path.isfile(os.path.join(path,f)) and f == vdate+'.csv')]
 		all_files +=files
@@ -113,12 +111,12 @@ def get_csv_list(ticker, vdate):
 def mproc_job(ticker, vdate):
 	try:
 		conn = None
-		conn = db_setup.get_conn()
-		#with lock:
-		logging.info("DB connection established")
+		conn = src.db_setup.get_conn()
+		with lock:
+			logging.info("DB connection established")
 		so.save_data(ticker, vdate)
-		#with lock:
-		logging.info(ticker+": EOD options data saved into csv's")
+		with lock:
+			logging.info(ticker+": EOD options data saved into csv's")
 
 		cursor = conn.cursor()
 		csv_files = get_csv_list(ticker, vdate)
@@ -126,8 +124,8 @@ def mproc_job(ticker, vdate):
 		for csv in csv_files:
 			import_table(csv, ticker, cursor)
 			logging.info(csv + " inserted")
-		#with lock:
-		logging.info(ticker+": inserted into db + committed")
+		with lock:
+			logging.info(ticker+": inserted into db + committed")
 		conn.commit()
 		
 	except Exception as err:
@@ -149,7 +147,7 @@ def scrape_htmls(tickers,vdate):
 	
 
 
-def main():
+def run_scraper():
 	if not os.path.isdir("logs"):
 		os.makedirs("logs")
 	logging.basicConfig(level=logging.DEBUG, 
@@ -161,7 +159,7 @@ def main():
 
 	try:
 		#cur.execute("""SELECT ticker, exchange FROM TICKERS""")
-		conn = db_setup.get_conn()
+		conn = src.db_setup.get_conn()
 		cur = conn.cursor()
 		cur.execute("""SELECT ticker FROM TICKERS""")
 		tickers = cur.fetchall()
@@ -176,27 +174,31 @@ def main():
 		start = timer()
 		
 
-		#pool_size = cpu_count()
+		pool_size = cpu_count()
 		scrape_htmls(tickers, vdate)
 		print(f'starting computations on {pool_size} cores')
 		with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 			args = [(t[0],vdate) for t in tickers]
 			pool.starmap(mproc_job, args)
 		
-		conn = db_setup.get_conn()
+		conn = src.db_setup.get_conn()
 		cur = conn.cursor()
 		update_options_chain(conn)
 		update_options_metrics(conn)
 		end = timer()
 		print(f'elapsed time: {end - start}')
 	except Exception as err:
-		#logging.error(db_setup.print_psycopg2_exception(err))
 		exc_info = sys.exc_info()
 		logging.error(err, traceback.print_exception(*exc_info))
 		sys.exit()
 	finally:
 		if conn:
 			conn.close()
+
+
+
+def main():
+	run_scraper()
 			
 if __name__ == '__main__':
 	main()

@@ -1,17 +1,17 @@
 import psycopg2
 from psycopg2 import pool
-import db_config
+import src.db_config
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
 
 def get_conn():
 	try:
 		# create connection and cursor    
-		conn = psycopg2.connect(user = db_config.user,
-									password = db_config.password,
-									host = db_config.host,
-									port = db_config.port,
-									database = db_config.database)
+		conn = psycopg2.connect(user = src.db_config.user,
+									password = src.db_config.password,
+									host = src.db_config.host,
+									port = src.db_config.port,
+									database = src.db_config.database)
 	except Exception as err:
 		raise err
 	return conn
@@ -48,18 +48,18 @@ def exec_query(conn, query):
 	
 def main():
 	try:
-		conn = psycopg2.connect(user = db_config.user,
-									password = db_config.password,
-									host = db_config.host,
-									port = db_config.port,
-									database = db_config.database)
+		conn = psycopg2.connect(user = src.db_config.user,
+									password = src.db_config.password,
+									host = src.db_config.host,
+									port = src.db_config.port,
+									database = src.db_config.database)
 		if(conn):
 			print("Connection created successfully")
 		
-		exec_query(conn, db_config.create_tickers_query)
-		exec_query(conn, db_config.create_options_chain_query)
-		exec_query(conn, db_config.create_options_metrics_query)
-		exec_query(conn, db_config.create_import_query)
+		exec_query(conn, src.db_config.create_tickers_query)
+		exec_query(conn, src.db_config.create_options_chain_query)
+		exec_query(conn, src.db_config.create_options_metrics_query)
+		exec_query(conn, src.db_config.create_import_query)
 		conn.commit()
 	except Exception as err:
 		conn = None

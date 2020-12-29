@@ -28,7 +28,7 @@ def get_html(ticker, vdate):
 				exception = False
 			except requests.exceptions.RequestException as e:
 				print(e)
-				time.sleep(15)
+				time.sleep(20)
 				exception = True
 		if not os.path.isdir("bs4_html"):
 			os.makedirs("bs4_html")
